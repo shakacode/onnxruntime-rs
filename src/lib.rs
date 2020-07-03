@@ -8,7 +8,7 @@ pub mod sys;
 // Re-export enums
 pub use sys::{
     AllocatorType, ErrorCode, ExecutionMode, GraphOptimizationLevel, LoggingLevel, MemType,
-    OnnxTensorElementDataType, OnnxType,
+    OnnxTensorElementDataType, OnnxType, 
 };
 
 #[macro_use]
@@ -160,6 +160,41 @@ impl SessionOptions {
         let raw = call!(@unsafe @ptr CreateSessionOptions)?;
         Ok(SessionOptions { raw })
     }
+    
+    pub fn add_cpu(&self, use_arena: bool) {
+        let so = self.raw;
+        let status = unsafe {
+            crate::sys::SessionOptionsAppendExecutionProvider_CPU(so, if use_arena { 1 } else { 0 })
+        };
+
+        if !status.is_null() {
+            panic!("!!!");
+        }
+    }
+
+    pub fn add_cuda(&self, device_id: i32) {
+        
+        let so = self.raw;
+        let status = unsafe {
+            crate::sys::SessionOptionsAppendExecutionProvider_CUDA(so, device_id)
+        };
+
+        if !status.is_null() {
+            panic!("!!!");
+        }
+    }
+
+    pub fn add_tensorrt(&self, device_id: i32) {
+        
+        let so = self.raw;
+        let status = unsafe {
+            crate::sys::SessionOptionsAppendExecutionProvider_Tensorrt(so, device_id)
+        };
+
+        if !status.is_null() {
+            panic!("!!!");
+        }
+    }
 
     options! {
     fn enable_mem_pattern() { EnableMemPattern };
@@ -171,6 +206,8 @@ impl SessionOptions {
     fn disable_cpu_mem_arena() { DisableCpuMemArena };
     fn set_session_log_id(log_id: &str) { SetSessionLogId };
     fn en_prof(path: &CStr | .as_ptr()) { EnableProfiling };
+    fn set_execution_mode(mode: ExecutionMode) { SetSessionExecutionMode };
+    
     fn set_session_log_verbosity_level(verbosity_level: i32) { SetSessionLogVerbosityLevel };
     fn set_session_log_severity_level(severity_level: i32) { SetSessionLogSeverityLevel };
     fn set_session_graph_optimization_level(graph_optimization_level: GraphOptimizationLevel)
@@ -422,7 +459,7 @@ impl Session {
         assert_eq!(input_names.len(), inputs.len());
 
         let output_size = output_names.len() as u64;
-        let mut raw_outputs: *mut sys::Value = ptr::null_mut();
+        let mut raw_outputs: Box<[*mut sys::Value]> = (0..output_size).map(|_| ptr::null_mut()).collect();
         call!(@unsafe
             Run,
             self.raw,
@@ -432,17 +469,15 @@ impl Session {
             inputs.len() as u64,
             cstr_ptrs(output_names).as_ptr(),
             output_size,
-            &mut raw_outputs
+            raw_outputs.as_mut_ptr() as *mut *mut sys::Value
         )?;
 
-        unsafe {
-            Ok(
-                std::slice::from_raw_parts(&raw_outputs, output_size as usize)
-                    .iter()
-                    .map(|v| Value { raw: *v })
-                    .collect(),
-            )
-        }
+        Ok(
+            raw_outputs
+                .into_iter()
+                .map(|v| Value { raw: *v })
+                .collect()
+        )
     }
 }
 

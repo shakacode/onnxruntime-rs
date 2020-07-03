@@ -77,6 +77,7 @@ fn tensor_mut(elem_type: OnnxTensorElementDataType, dims: &[usize]) -> Box<dyn A
     match elem_type {
         Float => Box::new(Tensor::<f32>::init(dims, 0.0).unwrap()),
         Int64 => Box::new(Tensor::<i64>::init(dims, 0).unwrap()),
+        Int32 => Box::new(Tensor::<i32>::init(dims, 0).unwrap()),
         t => panic!("Unsupported type {:?}", t),
     }
 }
@@ -90,6 +91,7 @@ fn tensor_with_size(
     match ty {
         Float => Box::new(Tensor::<f32>::init(&dims, 0.0).unwrap()),
         Int64 => Box::new(Tensor::<i64>::init(&dims, 0).unwrap()),
+        Int32 => Box::new(Tensor::<i32>::init(&dims, 0).unwrap()),
         t => panic!("Unsupported type {:?}", t),
     }
 }
