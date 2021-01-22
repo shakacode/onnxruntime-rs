@@ -160,6 +160,24 @@ impl SessionOptions {
         let raw = call!(@unsafe @ptr CreateSessionOptions)?;
         Ok(SessionOptions { raw })
     }
+
+    pub fn available_providers(&self) -> Vec<String> {
+        let mut providers_array: *mut *mut i8 = std::ptr::null_mut();
+        let mut providers_len: i32 = 0;
+
+        call!(@unsafe @expect GetAvailableProviders, &mut providers_array, &mut providers_len);
+
+        let slice = unsafe { std::slice::from_raw_parts(providers_array, providers_len as usize) };
+        
+        let mut res = Vec::new();
+        for i in slice {
+            res.push(unsafe {CStr::from_ptr(*i)}.to_string_lossy().to_string());
+        }
+
+        call!(@unsafe @expect ReleaseAvailableProviders, providers_array, providers_len);
+
+        res
+    }
     
     pub fn add_cpu(&self, use_arena: bool) {
         let so = self.raw;

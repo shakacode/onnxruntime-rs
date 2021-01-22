@@ -25,6 +25,8 @@ fn main() -> Result<()> {
 
     let so = SessionOptions::new()?;
 
+    println!("Available Providers: {:?}", so.available_providers());
+
     for path in &opt.onnx {
         println!("model {:?}", path);
         let session = match Session::new(&env, path, &so) {
