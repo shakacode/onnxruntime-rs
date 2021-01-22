@@ -28,8 +28,6 @@ fn main() {
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .whitelist_function("OrtGetApiBase")
         .whitelist_function("OrtSessionOptionsAppendExecutionProvider_CPU")
-        .whitelist_function("OrtSessionOptionsAppendExecutionProvider_OpenVINO")
-        .whitelist_function("OrtSessionOptionsAppendExecutionProvider_CUDA")
         .whitelist_function("OrtSessionOptionsAppendExecutionProvider_Tensorrt")
         .whitelist_var("ORT_.*")
         .whitelist_recursively(true)

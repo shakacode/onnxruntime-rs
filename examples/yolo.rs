@@ -30,147 +30,6 @@ struct Opt {
     runs: usize,
 }
 
-// #[derive(Debug, Clone)]
-// struct ModelInfo {
-//     pub path: PathBuf,
-//     pub name: String,
-//     pub description: String,
-//     pub version: i64,
-//     pub input_shape: Vec<i64>,
-//     pub output_shape: Vec<i64>,
-//     pub input_name: String,
-//     pub output_name: String,
-// }
-
-// struct OnnxModelConfig {
-//     pub model_path: PathBuf,
-//     pub parallel: bool,
-//     pub use_cuda: bool,
-//     pub use_cpu: bool,
-//     pub use_tensorrt: bool,
-//     pub cpu_use_arena:bool,
-//     pub tensorrt_device_index: i32,
-//     pub cuda_device_index: i32,
-//     pub logging_level: LoggingLevel,
-//     pub logging_id: String,
-// }
-
-// struct OnnxModel {
-//     info: Arc<ModelInfo>,
-//     env: Env,
-//     options: SessionOptions,
-//     session: Session,
-// }
-
-// impl OnnxModel {
-//     pub fn new(config: OnnxModelConfig) -> Result<Self, Error> {
-//         let env = Env::new(config.logging_level, &config.logging_id)?;
-//         let mut options = SessionOptions::new()?;
-        
-//         if config.parallel {
-//             options.set_execution_mode(ExecutionMode::Parallel)?;
-//         }
-
-//         if config.use_cpu {
-//             options.add_cpu(config.cpu_use_arena);
-//         }
-
-//         if config.use_cuda {
-//             options.add_cuda(config.cuda_device_index);
-//         }
-
-//         if config.use_tensorrt {
-//             options.add_tensorrt(config.tensorrt_device_index);
-//         }
-
-//         let session = Session::new(&env, config.model_path.to_str().unwrap(), &options)?;
-//         let metadata = session.metadata();
-//         let inputs = session.inputs();
-//         let outputs = session.outputs();
-
-//         if inputs.len() != 1 {
-//             return Err(Error::ModelWrongInputsCount);
-//         }
-
-//         if outputs.len() != 1 {
-//             return Err(Error::ModelWrongOutputsCount);
-//         }
-        
-//         let input = session.input(0);
-//         let input_info = input
-//             .tensor_info()
-//             .or_else(|| Error::ModelWrongInputType)?;
-//         let input_name = input.name().to_string();
-//         let input_shape: Vec<i64> = input_info
-//             .symbolic_dims()
-//             .map(|d| match d {
-//                 SymbolicDim::Symbolic(_) => -1i64,
-//                 SymbolicDim::Fixed(x) => x as i64,
-//             })
-//             .collect();
-
-//         let output = session.output(0);
-//         let output_info = output
-//             .tensor_info()
-//             .or_else(|| Error::ModelWrongInputType)?;
-//         let output_name = output.name().to_string();
-//         let output_shape: Vec<i64> = output_info
-//             .symbolic_dims()
-//             .map(|d| match d {
-//                 SymbolicDim::Symbolic(_) => -1i64,
-//                 SymbolicDim::Fixed(x) => x as i64,
-//             })
-//             .collect();
-        
-//         let info = ModelInfo {
-//             path: path.into(),
-//             name: format!("{} exported by {}", metadata.graph_name(),  metadata.producer_name()),
-//             description: metadata.description().to_string(),
-//             version: metadata.version(),
-//             input_name,
-//             input_shape,
-//             output_name,
-//             output_shape,
-//         };
-
-//         Ok(OnnxModel {
-//             info: Arc::new(info),
-//             env,
-//             options,
-//             session,
-//         })
-//     }
-// }
-
-
-// pub enum ModelCommand {
-//     AddOnnxModel(usize, OnnxModelConfig),
-//     Inference(usize, )
-// }
-
-// struct ModelPool {
-//     counter: usize,
-//     sender: Sender<ModelCommand>,
-// }
-
-// impl ModelPool {
-//     pub fn add(&mut self, name: &str, file: Path) -> Result<&AsyncModel, Error> {
-        
-//     }
-
-//     pub fn get_model(&self, name: &str) -> Option<&AsyncModel> {
-
-//     }
-// }
-
-
-// struct AsyncModel {
-    
-// }
-
-
-
-
 use std::collections::HashMap;
 
 fn key_val_parse(str: &str) -> HashMap<String, usize> {
@@ -251,7 +110,7 @@ fn tensor_with_size(
     println!("{:?} {} {:?}", ty, name, dims);
     match ty {
         Float => match name {
-            "input" => Box::new(Tensor::<f32>::new(&dims, load_image("/home/andrey/Images/me.jpg", dims[2], dims[3])).unwrap()),
+            "input" => Box::new(Tensor::<f32>::new(&dims, load_image("/data/andrey_/Images/me.jpg", dims[2], dims[3])).unwrap()),
             _ => Box::new(Tensor::<f32>::init(&dims, 0.0).unwrap()),
         },
         Int64 => Box::new(Tensor::<i64>::init(&dims, 0).unwrap()),
@@ -268,7 +127,7 @@ fn main() -> Result<()> {
 
     // so.set_execution_mode(ExecutionMode::Parallel)?;
     // so.add_tensorrt(0);
-    // so.add_cuda(0);
+    so.add_cuda(0);
     // so.add_cpu(true);
 
     let mut map = if let Some(dims) = &opt.dims {

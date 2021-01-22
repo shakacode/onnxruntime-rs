@@ -8,7 +8,7 @@ pub mod sys;
 // Re-export enums
 pub use sys::{
     AllocatorType, ErrorCode, ExecutionMode, GraphOptimizationLevel, LoggingLevel, MemType,
-    OnnxTensorElementDataType, OnnxType, 
+    OnnxTensorElementDataType, OnnxType, CUDAProviderOptions, CudnnConvAlgoSearch, OpenVINOProviderOptions
 };
 
 #[macro_use]
@@ -173,19 +173,29 @@ impl SessionOptions {
     }
 
     pub fn add_cuda(&self, device_id: i32) {
-        
-        let so = self.raw;
-        let status = unsafe {
-            crate::sys::SessionOptionsAppendExecutionProvider_CUDA(so, device_id)
+        let cuda_options = CUDAProviderOptions {
+            device_id,
+            cudnn_conv_algo_search: CudnnConvAlgoSearch::Default,
+            cuda_mem_limit: u64::MAX,
+            arena_extend_strategy: 0,
+            do_copy_in_default_stream: 1,
         };
 
-        if !status.is_null() {
-            panic!("!!!");
-        }
+        call!(@unsafe @expect SessionOptionsAppendExecutionProvider_CUDA, self.raw, &cuda_options);
+    }
+
+    pub fn add_open_vino(&self, device_type: &CStr, device_id: &CStr) {
+        let openvino_options = OpenVINOProviderOptions {
+            device_type: device_type.as_ptr(),
+            enable_vpu_fast_compile: 0,
+            device_id: device_id.as_ptr(),
+            num_of_threads: 0,
+        };
+
+        call!(@unsafe @expect SessionOptionsAppendExecutionProvider_OpenVINO, self.raw, &openvino_options);
     }
 
     pub fn add_tensorrt(&self, device_id: i32) {
-        
         let so = self.raw;
         let status = unsafe {
             crate::sys::SessionOptionsAppendExecutionProvider_Tensorrt(so, device_id)
