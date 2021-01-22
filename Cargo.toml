@@ -14,5 +14,5 @@ crossbeam = "0.7.3"
 image = "0.23.6"
 
 [build-dependencies]
-bindgen = "0.53.2"
+bindgen = "0.56"
 heck = "0.3"
