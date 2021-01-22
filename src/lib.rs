@@ -160,8 +160,8 @@ impl SessionOptions {
         let raw = call!(@unsafe @ptr CreateSessionOptions)?;
         Ok(SessionOptions { raw })
     }
-
-    pub fn available_providers(&self) -> Vec<String> {
+    
+    pub fn available_providers() -> Vec<String> {
         let mut providers_array: *mut *mut i8 = std::ptr::null_mut();
         let mut providers_len: i32 = 0;
 
@@ -178,7 +178,7 @@ impl SessionOptions {
 
         res
     }
-    
+
     pub fn add_cpu(&self, use_arena: bool) {
         let so = self.raw;
         let status = unsafe {
