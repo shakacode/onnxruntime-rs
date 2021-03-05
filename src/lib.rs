@@ -197,6 +197,8 @@ impl SessionOptions {
             cuda_mem_limit: u64::MAX,
             arena_extend_strategy: 0,
             do_copy_in_default_stream: 1,
+            has_user_compute_stream: 0,
+            user_compute_stream: std::ptr::null_mut(),
         };
 
         call!(@unsafe @expect SessionOptionsAppendExecutionProvider_CUDA, self.raw, &cuda_options);
