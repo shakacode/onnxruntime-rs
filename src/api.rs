@@ -6,7 +6,6 @@ lazy_static::lazy_static! {
     };
 }
 
-#[macro_use]
 macro_rules! call {
     // the raw call
     (@raw $name:ident, $($arg:expr),*) => {

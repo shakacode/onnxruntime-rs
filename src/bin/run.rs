@@ -4,13 +4,13 @@ use std::time::{Duration, Instant};
 use onnxruntime::*;
 use structopt::{clap, StructOpt};
 
+#[derive(StructOpt)]
 #[structopt(
     name = "run",
     about = "Run a benchmark on an onnx model. Each worker runs the model in a loop in its own
     thead. Once done it will print the average time to run the model.",
     setting = clap::AppSettings::ColoredHelp
 )]
-#[derive(StructOpt)]
 struct Opt {
     /// The path to the onnx files to benchmark
     onnx: Vec<String>,

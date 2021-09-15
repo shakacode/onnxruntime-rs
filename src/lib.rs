@@ -194,11 +194,12 @@ impl SessionOptions {
         let cuda_options = CUDAProviderOptions {
             device_id,
             cudnn_conv_algo_search: CudnnConvAlgoSearch::Default,
-            cuda_mem_limit: u64::MAX,
+            gpu_mem_limit: u64::MAX,
             arena_extend_strategy: 0,
             do_copy_in_default_stream: 1,
             has_user_compute_stream: 0,
             user_compute_stream: std::ptr::null_mut(),
+            default_memory_arena_cfg: std::ptr::null_mut(),
         };
 
         call!(@unsafe @expect SessionOptionsAppendExecutionProvider_CUDA, self.raw, &cuda_options);
@@ -210,6 +211,8 @@ impl SessionOptions {
             enable_vpu_fast_compile: 0,
             device_id: device_id.as_ptr(),
             num_of_threads: 0,
+            use_compiled_network: 0,
+            blob_dump_path: std::ptr::null_mut(),
         };
 
         call!(@unsafe @expect SessionOptionsAppendExecutionProvider_OpenVINO, self.raw, &openvino_options);
