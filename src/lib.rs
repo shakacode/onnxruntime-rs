@@ -213,6 +213,7 @@ impl SessionOptions {
             num_of_threads: 0,
             use_compiled_network: 0,
             blob_dump_path: std::ptr::null_mut(),
+            context: std::ptr::null_mut(),
         };
 
         call!(@unsafe @expect SessionOptionsAppendExecutionProvider_OpenVINO, self.raw, &openvino_options);
