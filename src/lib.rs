@@ -507,7 +507,7 @@ impl Session {
             raw_outputs.as_mut_ptr() as *mut *mut sys::Value
         )?;
 
-        Ok(raw_outputs.into_iter().map(|v| Value { raw: *v }).collect())
+        Ok(raw_outputs.iter().map(|v| Value { raw: *v }).collect())
     }
 }
 
