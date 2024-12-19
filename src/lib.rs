@@ -257,7 +257,7 @@ impl TypeInfo {
     }
 
     pub fn tensor_info(&self) -> Option<&TensorInfo> {
-        let raw = call!(@unsafe @arg ptr::null(); @expect CastTypeInfoToTensorInfo, self.raw);
+        let raw = call!(@unsafe @arg ptr::null_mut(); @expect CastTypeInfoToTensorInfo, self.raw);
         if raw.is_null() {
             None
         } else {
@@ -475,7 +475,7 @@ impl Session {
             self.raw,
             options.raw,
             cstr_ptrs(input_names).as_ptr(),
-            inputs.as_ptr() as *const *const sys::Value,
+            inputs.as_ptr() as *const *mut sys::Value,
             inputs.len() as u64,
             cstr_ptrs(output_names).as_ptr(),
             output_names.len() as u64,
@@ -499,7 +499,7 @@ impl Session {
             self.raw,
             options.raw,
             cstr_ptrs(input_names).as_ptr(),
-            inputs.as_ptr() as *const *const sys::Value,
+            inputs.as_ptr() as *const *mut sys::Value,
             inputs.len() as u64,
             cstr_ptrs(output_names).as_ptr(),
             output_size,
