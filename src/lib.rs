@@ -7,9 +7,8 @@ use std::ptr;
 pub mod sys;
 // Re-export enums
 pub use sys::{
-    AllocatorType, CUDAProviderOptions, CudnnConvAlgoSearch, ErrorCode, ExecutionMode,
-    GraphOptimizationLevel, LoggingLevel, MemType, OnnxTensorElementDataType, OnnxType,
-    OpenVINOProviderOptions,
+    AllocatorType, ErrorCode, ExecutionMode, GraphOptimizationLevel, LoggingLevel, MemType,
+    OnnxTensorElementDataType, OnnxType, CUDAProviderOptions, CudnnConvAlgoSearch, OpenVINOProviderOptions
 };
 
 #[macro_use]
@@ -161,7 +160,7 @@ impl SessionOptions {
         let raw = call!(@unsafe @ptr CreateSessionOptions)?;
         Ok(SessionOptions { raw })
     }
-
+    
     pub fn available_providers() -> Vec<String> {
         let mut providers_array: *mut *mut i8 = std::ptr::null_mut();
         let mut providers_len: i32 = 0;
@@ -169,10 +168,10 @@ impl SessionOptions {
         call!(@unsafe @expect GetAvailableProviders, &mut providers_array, &mut providers_len);
 
         let slice = unsafe { std::slice::from_raw_parts(providers_array, providers_len as usize) };
-
+        
         let mut res = Vec::new();
         for i in slice {
-            res.push(unsafe { CStr::from_ptr(*i) }.to_string_lossy().to_string());
+            res.push(unsafe {CStr::from_ptr(*i)}.to_string_lossy().to_string());
         }
 
         call!(@unsafe @expect ReleaseAvailableProviders, providers_array, providers_len);
@@ -222,8 +221,9 @@ impl SessionOptions {
 
     pub fn add_tensorrt(&self, device_id: i32) {
         let so = self.raw;
-        let status =
-            unsafe { crate::sys::SessionOptionsAppendExecutionProvider_Tensorrt(so, device_id) };
+        let status = unsafe {
+            crate::sys::SessionOptionsAppendExecutionProvider_Tensorrt(so, device_id)
+        };
 
         if !status.is_null() {
             panic!("!!!");
@@ -241,7 +241,7 @@ impl SessionOptions {
     fn set_session_log_id(log_id: &str) { SetSessionLogId };
     fn en_prof(path: &CStr | .as_ptr()) { EnableProfiling };
     fn set_execution_mode(mode: ExecutionMode) { SetSessionExecutionMode };
-
+    
     fn set_session_log_verbosity_level(verbosity_level: i32) { SetSessionLogVerbosityLevel };
     fn set_session_log_severity_level(severity_level: i32) { SetSessionLogSeverityLevel };
     fn set_session_graph_optimization_level(graph_optimization_level: GraphOptimizationLevel)
@@ -257,7 +257,7 @@ impl TypeInfo {
     }
 
     pub fn tensor_info(&self) -> Option<&TensorInfo> {
-        let raw = call!(@unsafe @arg ptr::null_mut(); @expect CastTypeInfoToTensorInfo, self.raw);
+        let raw = call!(@unsafe @arg ptr::null(); @expect CastTypeInfoToTensorInfo, self.raw);
         if raw.is_null() {
             None
         } else {
@@ -475,7 +475,7 @@ impl Session {
             self.raw,
             options.raw,
             cstr_ptrs(input_names).as_ptr(),
-            inputs.as_ptr() as *const *mut sys::Value,
+            inputs.as_ptr() as *const *const sys::Value,
             inputs.len() as u64,
             cstr_ptrs(output_names).as_ptr(),
             output_names.len() as u64,
@@ -493,21 +493,25 @@ impl Session {
         assert_eq!(input_names.len(), inputs.len());
 
         let output_size = output_names.len() as u64;
-        let mut raw_outputs: Box<[*mut sys::Value]> =
-            (0..output_size).map(|_| ptr::null_mut()).collect();
+        let mut raw_outputs: Box<[*mut sys::Value]> = (0..output_size).map(|_| ptr::null_mut()).collect();
         call!(@unsafe
             Run,
             self.raw,
             options.raw,
             cstr_ptrs(input_names).as_ptr(),
-            inputs.as_ptr() as *const *mut sys::Value,
+            inputs.as_ptr() as *const *const sys::Value,
             inputs.len() as u64,
             cstr_ptrs(output_names).as_ptr(),
             output_size,
             raw_outputs.as_mut_ptr() as *mut *mut sys::Value
         )?;
 
-        Ok(raw_outputs.iter().map(|v| Value { raw: *v }).collect())
+        Ok(
+            raw_outputs
+                .into_iter()
+                .map(|v| Value { raw: *v })
+                .collect()
+        )
     }
 }
 
