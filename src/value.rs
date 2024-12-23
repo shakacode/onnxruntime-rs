@@ -42,11 +42,9 @@ impl Val {
     pub fn as_slice<T: OrtType>(&self) -> Option<&[T]> {
         let st = self.shape_and_type();
         if st.elem_type() == T::onnx_type() {
-            let len = st.dims().into_iter().map(|x|x as usize).product();
+            let len = st.dims().into_iter().map(|x| x as usize).product();
             let data = self.tensor_data();
-            Some(unsafe {
-                &*std::ptr::slice_from_raw_parts(data as *mut T, len)
-            })
+            Some(unsafe { &*std::ptr::slice_from_raw_parts(data as *mut T, len) })
         } else {
             None
         }

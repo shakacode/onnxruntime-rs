@@ -2,8 +2,8 @@ use std::ffi::CStr;
 use std::time::{Duration, Instant};
 
 use onnxruntime::*;
-use structopt::{clap, StructOpt};
 use std::path::PathBuf;
+use structopt::{clap, StructOpt};
 
 #[structopt(
     name = "run",
@@ -73,9 +73,13 @@ fn tensor_size(
     (info.elem_type(), dims)
 }
 
-fn tensor_mut(name: &str, elem_type: OnnxTensorElementDataType, dims: &[usize]) -> Box<dyn AsMut<Val>> {
+fn tensor_mut(
+    name: &str,
+    elem_type: OnnxTensorElementDataType,
+    dims: &[usize],
+) -> Box<dyn AsMut<Val>> {
     use OnnxTensorElementDataType::*;
-    
+
     println!("{:?} {} {:?}", elem_type, name, dims);
 
     match elem_type {
@@ -87,7 +91,8 @@ fn tensor_mut(name: &str, elem_type: OnnxTensorElementDataType, dims: &[usize]) 
 }
 
 fn load_image(filename: &str, height: usize, width: usize) -> Vec<f32> {
-    let img = image::open(filename).unwrap()
+    let img = image::open(filename)
+        .unwrap()
         // .resize_exact(width as _,  height as _, image::imageops::FilterType::Triangle)
         .into_rgb();
 
@@ -110,7 +115,13 @@ fn tensor_with_size(
     println!("{:?} {} {:?}", ty, name, dims);
     match ty {
         Float => match name {
-            "input" => Box::new(Tensor::<f32>::new(&dims, load_image("/data/andrey_/Images/me.jpg", dims[2], dims[3])).unwrap()),
+            "input" => Box::new(
+                Tensor::<f32>::new(
+                    &dims,
+                    load_image("/data/andrey_/Images/me.jpg", dims[2], dims[3]),
+                )
+                .unwrap(),
+            ),
             _ => Box::new(Tensor::<f32>::init(&dims, 0.0).unwrap()),
         },
         Int64 => Box::new(Tensor::<i64>::init(&dims, 0).unwrap()),
@@ -162,7 +173,11 @@ fn main() -> Result<()> {
         for (i, input) in session.inputs().enumerate() {
             if let Some(tensor_info) = input.tensor_info() {
                 input_names.push(input.name());
-                input_tensors.push(tensor_with_size(input.name().as_str(), &tensor_info, &mut map));
+                input_tensors.push(tensor_with_size(
+                    input.name().as_str(),
+                    &tensor_info,
+                    &mut map,
+                ));
             } else {
                 println!("input {}: {:?} {:?}", i, &*input.name(), input.onnx_type());
             }
@@ -199,7 +214,7 @@ fn main() -> Result<()> {
 
         let tensor = match res.pop().unwrap().as_tensor::<f32>() {
             Ok(t) => t,
-            _ => panic!("something went wrong")
+            _ => panic!("something went wrong"),
         };
 
         println!("[{:?}] {}", tensor.dims(), before.elapsed().as_millis())
