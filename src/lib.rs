@@ -401,7 +401,7 @@ impl Session {
         ModelMetadata { raw }
     }
 
-    fn argument(&self, ix: usize, arg_type: ArgType) -> ArgumentInfo {
+    fn argument(&self, ix: usize, arg_type: ArgType) -> ArgumentInfo<'_> {
         ArgumentInfo {
             session: &self,
             ix,
@@ -410,7 +410,7 @@ impl Session {
         }
     }
 
-    fn arguments(&self, arg_type: ArgType) -> Arguments {
+    fn arguments(&self, arg_type: ArgType) -> Arguments<'_> {
         Arguments {
             session: self,
             ix: 0,
@@ -430,32 +430,32 @@ impl Session {
     }
 
     /// Gets the input with the given index. Will error if the index is out of bounds.
-    pub fn input(&self, ix: usize) -> ArgumentInfo {
+    pub fn input(&self, ix: usize) -> ArgumentInfo<'_> {
         self.argument(ix, ArgType::Input)
     }
 
     /// Gets the output with the given index. Will error if the index is out of bounds.
-    pub fn output(&self, ix: usize) -> ArgumentInfo {
+    pub fn output(&self, ix: usize) -> ArgumentInfo<'_> {
         self.argument(ix, ArgType::Output)
     }
 
     /// Gets the overridable initializer with the given index. Will error if the index is out of bounds.
-    pub fn overridable_initializer(&self, ix: usize) -> ArgumentInfo {
+    pub fn overridable_initializer(&self, ix: usize) -> ArgumentInfo<'_> {
         self.argument(ix, ArgType::Initialiser)
     }
 
     /// Gets an iterator over the inputs of this session.
-    pub fn inputs(&self) -> Arguments {
+    pub fn inputs(&self) -> Arguments<'_> {
         self.arguments(ArgType::Input)
     }
 
     /// Gets an iterator over the outputs of this session.
-    pub fn outputs(&self) -> Arguments {
+    pub fn outputs(&self) -> Arguments<'_> {
         self.arguments(ArgType::Output)
     }
 
     /// Gets an iterator over the overridable initializers of this session.
-    pub fn overridable_initializers(&self) -> Arguments {
+    pub fn overridable_initializers(&self) -> Arguments<'_> {
         self.arguments(ArgType::Initialiser)
     }
 
@@ -508,7 +508,7 @@ impl Session {
 
         Ok(
             raw_outputs
-                .into_iter()
+                .iter()
                 .map(|v| Value { raw: *v })
                 .collect()
         )

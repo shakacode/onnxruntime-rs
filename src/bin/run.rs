@@ -130,7 +130,7 @@ fn main() -> Result<()> {
         for (i, input) in session.inputs().enumerate() {
             if let Some(tensor_info) = input.tensor_info() {
                 input_names.push(input.name());
-                input_tensors.push(tensor_with_size(&tensor_info, &mut map));
+                input_tensors.push(tensor_with_size(tensor_info, &mut map));
             } else {
                 println!("input {}: {:?} {:?}", i, &*input.name(), input.onnx_type());
             }
@@ -142,7 +142,7 @@ fn main() -> Result<()> {
         for (i, output) in session.outputs().enumerate() {
             if let Some(tensor_info) = output.tensor_info() {
                 output_names.push(output.name());
-                output_sizes.push(tensor_size(&tensor_info, &mut map));
+                output_sizes.push(tensor_size(tensor_info, &mut map));
             } else {
                 println!(
                     "output {}: {:?} {:?}",
