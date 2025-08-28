@@ -8,7 +8,7 @@ license = "MIT"
 [dependencies]
 lazy_static = "1.4"
 structopt = "0.3.14"
-crossbeam = "0.7.3"
+crossbeam = "0.8.3"
 
 [dev-dependencies]
 image = "0.23.6"
