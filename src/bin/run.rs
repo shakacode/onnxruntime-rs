@@ -167,7 +167,7 @@ fn main() -> Result<()> {
                     // allocate output vectors
                     let mut output_tensors: Vec<_> = output_sizes
                         .iter()
-                        .map(|(elem_type, size)| tensor_mut(*elem_type, size))
+                        .map(|(elem_type, size)| tensor_mut(elem_type.clone(), size))
                         .collect();
                     let mut out_vals: Vec<&mut Val> = output_tensors
                         .iter_mut()
